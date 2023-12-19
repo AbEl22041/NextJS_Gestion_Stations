@@ -1,0 +1,13 @@
+.imageIcon {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+
+    
+  }
+.imageIcon:hover{
+  cursor: pointer;
+  opacity: 0.6;
+  
+}

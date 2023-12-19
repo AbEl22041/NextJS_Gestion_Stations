@@ -1,0 +1,42 @@
+.DetailsButton {
+
+    transition: background-color 0.9s  , border-color 0.6s , color 0.6s  ; 
+}
+
+.DetailsButton:hover {
+    background-color: #f5f2f2 !important;
+    border-color: white !important; 
+    color: black !important;
+}
+
+
+.borderedTable {
+    border-collapse: collapse;
+}
+  
+.borderedTable thead th, .borderedTable tbody td {
+    border-left: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+}
+
+.borderedTable thead th:first-child, .borderedTable tbody td:first-child {
+    border-left: none;
+}
+
+.borderedTable thead th:last-child, .borderedTable tbody td:last-child {
+    border-right: none;
+}
+
+/* .borderedTable thead th {
+    border-bottom: 2px solid #dee2e6;
+} */
+
+.borderedTable tbody tr:first-child td {
+    border-top: none;
+}
+
+.borderedTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+  
