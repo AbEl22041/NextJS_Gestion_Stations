@@ -106,7 +106,7 @@ const Login: NextPage = () => {
                 <div className="text-center">
                   <h2>Sign up</h2>
                   <p>
-                  Bienvenue à FuelGes, la première solution informatique en Mauritanie pour la gestion des stations de carburant. Gérez efficacement vos pompistes, stocks de cuves, et ventes avec nos outils avancés. Profitez de statistiques détaillées pour optimiser vos revenus.
+                  welcome le7zou9 à FuelGes, la première solution informatique en Mauritanie pour la gestion des stations de carburant. Gérez efficacement vos pompistes, stocks de cuves, et ventes avec nos outils avancés. Profitez de statistiques détaillées pour optimiser vos revenus.
 
                   </p>
                   <Link href="/register">
