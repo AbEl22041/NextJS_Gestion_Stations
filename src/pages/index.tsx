@@ -1,14 +1,17 @@
-import type { NextPage } from 'next'
+import type { NextPage } from 'next';
 import React, { useState ,useEffect } from 'react';
 import { fetchStations } from  '../services/api';
+import axios from 'axios';
 import EditStation from '../components/editStation'; 
 import StationsList from '../components/stationsList';
+import {Station} from "../types/types";
 import styles from '../styles/Home.module.css';
 import bgPompiste from './worker_white.png'
 import bgPump from './gas_pump.png';
 import bgStation from './gas_station.png';
 import bgCuve from './cuve.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 import {
   faArrowUp,
   faDownload,
@@ -18,10 +21,13 @@ import {
   faGasPump,
   faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons'
+
 import {
   Button, ButtonGroup, Card, Dropdown, ProgressBar,
 } from 'react-bootstrap'
+
 import { Bar, Line } from 'react-chartjs-2'
+
 import {
   BarElement,
   CategoryScale,
@@ -39,8 +45,10 @@ Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement
 
 const random = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
+
+
 const Home: NextPage = () => {
-  const [stations, setStations] = useState([]);
+  const [stations, setStations] = useState<Station[]>([]); 
   const [showStations, setShowStations] = useState(false);
   const [editingStationId, setEditingStationId] = useState<number | null>(null);
 
@@ -50,12 +58,16 @@ const Home: NextPage = () => {
     setShowStations(true);
   };
   const handleEditStation = (stationId: number) => {
+  
     setEditingStationId(stationId);
+    setShowStations(false)
+   
   };
 
  
   const handleCloseEdit = () => {
     setEditingStationId(null);
+  
   };
 
   useEffect(() => {
@@ -63,6 +75,36 @@ const Home: NextPage = () => {
       fetchStations().then(data => setStations(data));
     }
   }, [showStations]);
+
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn) {
+      window.location.href = '/login';
+    }
+  }, []);
+
+  const updateStationsList = (updatedStationData: Station) => {
+    const updatedStations = stations.map((station) => {
+      if (station.id === updatedStationData.id) {
+        return updatedStationData;
+      }
+      return station;
+    });
+    setStations(updatedStations);
+  };
+
+  const onUpdateStationsList = async (stationId: number, isActive: boolean) => {
+    try {
+      await axios.put(`http://127.0.0.1:8000/api/stations/${stationId}/`, { is_active: !isActive });
+      const updatedStations = stations.map(station => 
+        station.id === stationId ? { ...station, is_active: !isActive } : station
+      );
+      setStations(updatedStations);
+    } catch (error) {
+      console.error('Error updating station:', error);
+    }
+  };
+  
 
 
   return (
@@ -352,17 +394,21 @@ const Home: NextPage = () => {
 
     <Card className="mb-4">
     <Card.Body>
-  {showStations ? (
-    <> 
-    <StationsList stations={stations} onEdit={handleEditStation}  />
-    {editingStationId != null && (
-      <EditStation
+    {showStations && (
+    <StationsList stations={stations} onEdit={handleEditStation}
+    onUpdateStationsList={onUpdateStationsList}
+    
+    />
+  )}
+  {editingStationId != null && (
+    <EditStation
       stationId={editingStationId}
       onClose={handleCloseEdit}
-      />
-    )}
-    </>
-  ) : (
+      setShowStations={setShowStations}
+      updateStationsList={updateStationsList}
+    />
+  )}
+  {!showStations && editingStationId == null && (
     <>
       <div className="d-flex justify-content-between">
         <div>

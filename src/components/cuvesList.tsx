@@ -1,15 +1,7 @@
 import React from 'react';
+import {Cuve} from "../types/types";
 import { Table } from 'react-bootstrap';
 
-interface Cuve {
-  id: number;
-  Nb_pmp_alimente: number;
-  charge: string;
-  stocke: string;
-  Qt_min: string;
-  is_active: boolean;
-  id_station: number;
-}
 
 interface CuvesListProps {
   cuves: Cuve[];

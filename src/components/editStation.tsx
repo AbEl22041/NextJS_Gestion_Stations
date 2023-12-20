@@ -1,23 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Form, Button, Col, Row } from 'react-bootstrap';
+import {Station} from "../types/types";
 
-interface Station {
-  libelle: string;
-  location: string;
-  responsables: Array<any>;
-  is_active: boolean;
-  Nmbr_cuves: number;
-  Nmbr_pompes: number;
-  Nmbr_pompistes: number;
-}
+
 
 interface EditStationProps {
   stationId: number;
   onClose: () => void;
+  setShowStations: (show: boolean) => void;
+  updateStationsList: (updatedStation: Station) => void; 
 }
 
-const EditStation: React.FC<EditStationProps> = ({ stationId, onClose }) => {
-  const [stationData, setStationData] = useState<Station>({
+const EditStation: React.FC<EditStationProps> = ({ stationId, onClose, setShowStations, updateStationsList }) => {  const [stationData, setStationData] = useState<Station>({
     libelle: '',
     location: '',
     responsables: [],
@@ -30,12 +25,16 @@ const EditStation: React.FC<EditStationProps> = ({ stationId, onClose }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<Station>(`http://127.0.0.1:8000/api/stations/${stationId}`);
+        const response = await axios.get<Station>(`http://127.0.0.1:8000/api/stations/${stationId}/`);
+        console.log("API Response:", response.data); 
         setStationData(response.data);
+        
       } catch (error) {
         console.error('Erreur lors de la récupération des données de la station:', error);
+        
       }
     };
+    
 
     fetchData();
   }, [stationId]);
@@ -50,67 +49,111 @@ const EditStation: React.FC<EditStationProps> = ({ stationId, onClose }) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!stationData) return;
+  
     try {
-      await axios.put(`http://127.0.0.1:8000/api/stations/${stationId}`, stationData);
-      onClose();
+      const response = await axios.put(`http://127.0.0.1:8000/api/stations/${stationId}/`, stationData);
+      if (response.status === 200 || response.status === 204) {
+        updateStationsList(stationData);
+        setShowStations(true);
+        onClose(); 
+      }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de la station:', error);
+      console.error('Error:', error);
     }
   };
 
   if (!stationData) return <div>Chargement...</div>;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="libelle"
-        value={stationData.libelle}
-        onChange={handleChange}
-        aria-label="Libellé"
-        placeholder="Libellé"
-      />
-      <input
-        type="text"
-        name="location"
-        value={stationData.location}
-        onChange={handleChange}
-        aria-label="Localisation"
-        placeholder="Localisation"
-      />
-      <input
-        type="checkbox"
-        name="is_active"
-        checked={stationData.is_active}
-        onChange={handleChange}
-        aria-label="Active"
-      />
-      <input
-        type="number"
-        name="Nmbr_cuves"
-        value={stationData.Nmbr_cuves}
-        onChange={handleChange}
-        aria-label="Nombre de Cuves"
-        placeholder="Nombre de Cuves"
-      />
-      <input
-        type="number"
-        name="Nmbr_pompes"
-        value={stationData.Nmbr_pompes}
-        onChange={handleChange}
-        aria-label="Nombre de Pompes"
-        placeholder="Nombre de Pompes"
-      />
-      <input
-        type="number"
-        name="Nmbr_pompistes"
-        value={stationData.Nmbr_pompistes}
-        onChange={handleChange}
-        aria-label="Nombre de Pompistes"
-        placeholder="Nombre de Pompistes"
-      />
-      <button type="submit">Enregistrer les modifications</button>
-    </form>
+    <Form onSubmit={handleSubmit} className="m-4">
+      <Form.Group as={Row} className="mb-3" controlId="formLibelle">
+        <Form.Label column sm="2">Libellé</Form.Label>
+        <Col sm="10">
+          <Form.Control
+            type="text"
+            name="libelle"
+            value={stationData.libelle}
+            onChange={handleChange}
+            placeholder="Libellé de la station"
+          />
+        </Col>
+      </Form.Group>
+
+      <Form.Group as={Row} className="mb-3" controlId="formLocation">
+        <Form.Label column sm="2">Localisation</Form.Label>
+        <Col sm="10">
+          <Form.Control
+            type="text"
+            name="location"
+            value={stationData.location}
+            onChange={handleChange}
+            placeholder="Localisation de la station"
+          />
+        </Col>
+      </Form.Group>
+
+      <Form.Group as={Row} className="mb-3" controlId="formIsActive">
+        <Col sm={{ span: 10, offset: 2 }}>
+          <Form.Check
+            type="checkbox"
+            name="is_active"
+            label="Station Active"
+            checked={stationData.is_active}
+            onChange={handleChange}
+          />
+        </Col>
+      </Form.Group>
+
+      
+      <Form.Group as={Row} className="mb-3" controlId="formNmbrCuves">
+        <Form.Label column sm="2">Nombre de Cuves</Form.Label>
+        <Col sm="10">
+          <Form.Control
+            type="number"
+            name="Nmbr_cuves"
+            value={stationData.Nmbr_cuves}
+            onChange={handleChange}
+            placeholder="Nombre de Cuves"
+          />
+        </Col>
+      </Form.Group>
+
+      <Form.Group as={Row} className="mb-3" controlId="formNmbrPompes">
+        <Form.Label column sm="2">Nombre de Pompes</Form.Label>
+        <Col sm="10">
+          <Form.Control
+            type="number"
+            name="Nmbr_pompes"
+            value={stationData.Nmbr_pompes}
+            onChange={handleChange}
+            placeholder="Nombre de Pompes"
+          />
+        </Col>
+      </Form.Group>
+
+      <Form.Group as={Row} className="mb-3" controlId="formNmbrPompistes">
+        <Form.Label column sm="2">Nombre de Pompistes</Form.Label>
+        <Col sm="10">
+          <Form.Control
+            type="number"
+            name="Nmbr_pompistes"
+            value={stationData.Nmbr_pompistes}
+            onChange={handleChange}
+            placeholder="Nombre de Pompistes"
+          />
+        </Col>
+      </Form.Group>
+
+      <Row className="justify-content-end">
+        <Col sm={{ span: 10, offset: 2 }}>
+          <Button type="submit" variant="primary">Enregistrer les modifications</Button>
+        </Col>
+      </Row>
+    
+    </Form>
+
+    
   );
 };
 
