@@ -1,73 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Form, Button, Col, Row } from 'react-bootstrap';
-import {Station} from "../types/types";
+import { Form, Button, Row, Col } from 'react-bootstrap';
+import { Station } from "../types/types";
 
-
-
-interface EditStationProps {
-  stationId: number;
-  onClose: () => void;
-  setShowStations: (show: boolean) => void;
-  updateStationsList: (updatedStation: Station) => void; 
-  onlyUpdateActive?: boolean;
+interface AddStationProps {
+  onAddStation: (station: Station) => void;
+  onCancel: () => void;
 }
 
-const EditStation: React.FC<EditStationProps> = ({ stationId, onClose, setShowStations, updateStationsList , onlyUpdateActive }) => {  const [stationData, setStationData] = useState<Station>({
+const AddStation: React.FC<AddStationProps> = ({ onAddStation, onCancel }) => {
+  const initialStationData: Station = {
     libelle: '',
     location: '',
-    responsables: [],
     is_active: false,
     Nmbr_cuves: 0,
     Nmbr_pompes: 0,
     Nmbr_pompistes: 0,
-  });
+    responsables: [],
+    totalStock: 0, 
+    initialStationDatats: [],
+  };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get<Station>(`http://127.0.0.1:8000/api/stations/${stationId}/`);
-        console.log("API Response:", response.data); 
-        setStationData(response.data);
-        
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données de la station:', error);
-        
-      }
-    };
-    
-
-    fetchData();
-  }, [stationId]);
+  const [stationData, setStationData] = useState<Station>(initialStationData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, checked, type } = e.target;
-    setStationData({ 
-      ...stationData, 
-      [name]: type === 'checkbox' ? checked : value 
-    });
-  };
+    const { name, value, type, checked } = e.target;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!stationData) return;
-  
-    const dataToUpdate = onlyUpdateActive ? { is_active: stationData.is_active } : stationData;
-    
-    try {
-      const response = await axios.put(`http://127.0.0.1:8000/api/stations/${stationId}/`, dataToUpdate);
-      if (response.status === 200 || response.status === 204) {
-        updateStationsList(stationData);
-        setShowStations(true);
-        onClose(); 
-      }
-    } catch (error) {
-      console.error('Error:', error);
+   
+    if (type === 'checkbox') {
+      setStationData({
+        ...stationData,
+        [name]: checked,
+      });
+    } else {
+      setStationData({
+        ...stationData,
+        [name]: value,
+      });
     }
   };
-  
 
-  if (!stationData) return <div>Chargement...</div>;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    try {
+     
+      const response = await axios.post('http://127.0.0.1:8000/api/stations/create_station/', stationData);
+      
+      if (response.status === 201) {
+        onAddStation(response.data);
+        setStationData(initialStationData);
+      }
+    } catch (error) {
+      console.error('Error creating station:', error);
+    }
+  };
 
   return (
     <Form onSubmit={handleSubmit} className="m-4">
@@ -109,7 +96,6 @@ const EditStation: React.FC<EditStationProps> = ({ stationId, onClose, setShowSt
         </Col>
       </Form.Group>
 
-      
       <Form.Group as={Row} className="mb-3" controlId="formNmbrCuves">
         <Form.Label column sm="2">Nombre de Cuves</Form.Label>
         <Col sm="10">
@@ -151,14 +137,12 @@ const EditStation: React.FC<EditStationProps> = ({ stationId, onClose, setShowSt
 
       <Row className="justify-content-end">
         <Col sm={{ span: 10, offset: 2 }}>
-          <Button type="submit" variant="primary">Enregistrer les modifications</Button>
+          <Button type="submit" variant="primary">Ajouter</Button>
+          <Button variant="secondary" onClick={onCancel}>Annuler</Button>
         </Col>
       </Row>
-    
     </Form>
-
-    
   );
 };
 
-export default EditStation;
+export default AddStation;

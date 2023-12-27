@@ -10,13 +10,14 @@ import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 interface StationsListProps {
   stations: Station[];
-  onEdit: (stationId: number) => void; 
+  onEdit: (stationId: number, onlyUpdateActive?: boolean) => void;
   onUpdateStationsList: (stationId: number, isActive: boolean) => void; 
 }
 
 const StationsList: React.FC<StationsListProps> = ({ stations, onEdit, onUpdateStationsList }) => {
   const [showConfirmation, setShowConfirmation] = React.useState(false);
   const [selectedStation, setSelectedStation] = React.useState<Station | null>(null);
+  const [showAddStation, setShowAddStation] = React.useState(false);
 
   const toggleActiveStatus = async (station: Station) => {
  
@@ -24,11 +25,8 @@ const StationsList: React.FC<StationsListProps> = ({ stations, onEdit, onUpdateS
     setShowConfirmation(true);
   };
 
-  const handleToggleActive = (station: Station) => {
-    if (station.id !== undefined) {
-      const newActiveStatus = !station.is_active;
-      onUpdateStationsList(station.id, newActiveStatus);
-    }
+  const handleToggleActive = (stationId: number) => {
+    onEdit(stationId, true);  
   };
 
   const handleConfirmation = async () => {
@@ -44,7 +42,7 @@ const StationsList: React.FC<StationsListProps> = ({ stations, onEdit, onUpdateS
             onUpdateStationsList(selectedStation.id, updatedStation.is_active);
         }
     } catch (error) {
-        console.error('Error updating station:', error);
+        console.error('Error updating station 222 (stationList):', error);
     }
     setShowConfirmation(false);
     setSelectedStation(null);
@@ -53,6 +51,9 @@ const StationsList: React.FC<StationsListProps> = ({ stations, onEdit, onUpdateS
 
   return (
     <>
+    <button type="button" onClick={() => setShowAddStation(true)}>
+        Ajouter
+    </button>
     <Table striped  hover  className={styles.borderedTable}>
       <thead>
         <tr>
@@ -106,13 +107,17 @@ const StationsList: React.FC<StationsListProps> = ({ stations, onEdit, onUpdateS
             </button>
 
             <button 
-              className="btn btn-secondary btn-sm ml-1" 
-              type="button" 
-              aria-label="Activer/Désactiver"
-              style={{ fontSize: '12px', padding: '2px 5px' }}
-              onClick={() => station.id !== undefined && onUpdateStationsList(station.id, !station.is_active)}
+                className="btn btn-secondary btn-sm ml-1" 
+                type="button" 
+                aria-label="Activer/Désactiver"
+                style={{ fontSize: '12px', padding: '2px 5px' }}
+                onClick={() => {
+                    if (station.id !== undefined) {
+                        toggleActiveStatus(station);
+                    }
+                }}
             >
-              <FontAwesomeIcon icon={faPowerOff} />
+                <FontAwesomeIcon icon={faPowerOff} />
             </button>
             </td>
           </tr>
@@ -120,22 +125,23 @@ const StationsList: React.FC<StationsListProps> = ({ stations, onEdit, onUpdateS
       </tbody>
     </Table>
 
-            <Modal show={showConfirmation} onHide={() => setShowConfirmation(false)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Confirm Action</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {`Do you want to ${selectedStation?.is_active ? 'deactivate' : 'activate'} this station (${selectedStation?.libelle})?`}
-            </Modal.Body>
-            <Modal.Footer>
+      <Modal show={showConfirmation} onHide={() => setShowConfirmation(false)}>
+          <Modal.Header closeButton>
+              <Modal.Title>Confirmer l'action</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+              {`Voulez-vous ${selectedStation?.is_active ? 'désactiver' : 'activer'} cette station (${selectedStation?.libelle}, ${selectedStation?.location}) ?`}
+          </Modal.Body>
+          <Modal.Footer>
               <Button variant="secondary" onClick={() => setShowConfirmation(false)}>
-                Cancel
+                  Annuler
               </Button>
               <Button variant="primary" onClick={handleConfirmation}>
-                Confirm
+                  Confirmer
               </Button>
-            </Modal.Footer>
-            </Modal>
+          </Modal.Footer>
+      </Modal>
+
 </>
   );
 };

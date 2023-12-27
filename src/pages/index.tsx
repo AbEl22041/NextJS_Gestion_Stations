@@ -4,6 +4,7 @@ import { fetchStations } from  '../services/api';
 import axios from 'axios';
 import EditStation from '../components/editStation'; 
 import StationsList from '../components/stationsList';
+import AddStation from '../components/AddStation';
 import {Station} from "../types/types";
 import styles from '../styles/Home.module.css';
 import bgPompiste from './worker_white.png'
@@ -51,6 +52,7 @@ const Home: NextPage = () => {
   const [stations, setStations] = useState<Station[]>([]); 
   const [showStations, setShowStations] = useState(false);
   const [editingStationId, setEditingStationId] = useState<number | null>(null);
+  const [isOnlyUpdateActive, setIsOnlyUpdateActive] = useState(false);
 
   const handleViewDetails = async () => {
     const stationsData = await fetchStations();
@@ -95,17 +97,19 @@ const Home: NextPage = () => {
 
   const onUpdateStationsList = async (stationId: number, isActive: boolean) => {
     try {
-      await axios.put(`http://127.0.0.1:8000/api/stations/${stationId}/`, { is_active: !isActive });
+      console.log('Updating station with ID:', stationId);
+      await axios.post(`http://127.0.0.1:8000/api/stations/${stationId}/toggle_active/`);
+      console.log('POST request successful for station ID:', stationId);
       const updatedStations = stations.map(station => 
         station.id === stationId ? { ...station, is_active: !isActive } : station
       );
       setStations(updatedStations);
+      console.log('Stations list updated successfully:', updatedStations);
     } catch (error) {
-      console.error('Error updating station:', error);
+      console.error('Error updating station (index):', error);
     }
   };
   
-
 
   return (
   
@@ -393,22 +397,39 @@ const Home: NextPage = () => {
     </div>
 
     <Card className="mb-4">
-    <Card.Body>
+  <Card.Body>
     {showStations && (
-    <StationsList stations={stations} onEdit={handleEditStation}
-    onUpdateStationsList={onUpdateStationsList}
-    
-    />
-  )}
-  {editingStationId != null && (
-    <EditStation
-      stationId={editingStationId}
-      onClose={handleCloseEdit}
-      setShowStations={setShowStations}
-      updateStationsList={updateStationsList}
-    />
-  )}
-  {!showStations && editingStationId == null && (
+      <StationsList
+        stations={stations}
+        onEdit={handleEditStation}
+        onUpdateStationsList={onUpdateStationsList}
+      />
+    )}
+    {(editingStationId != null || showStations) && (
+      <>
+        {editingStationId != null && (
+          <EditStation
+            stationId={editingStationId}
+            onClose={handleCloseEdit}
+            setShowStations={setShowStations}
+            updateStationsList={updateStationsList}
+            onlyUpdateActive={isOnlyUpdateActive}
+          />
+        )}
+
+        {showStations && (
+          <AddStation
+            onAddStation={(newStation) => {
+              setShowStations(false);
+            }}
+            onCancel={() => {
+              setShowStations(false);
+            }}
+          />
+        )}
+      </>
+    )}
+    {!showStations && editingStationId == null && (
     <>
       <div className="d-flex justify-content-between">
         <div>

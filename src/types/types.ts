@@ -7,6 +7,9 @@ export interface Station {
     Nmbr_cuves: number;
     Nmbr_pompes: number;
     Nmbr_pompistes: number;
+    totalStock: number;
+    initialStationDatats: [] ;
+   
 }
 
 export interface Cuve {
