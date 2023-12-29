@@ -41,7 +41,7 @@ const Login: NextPage = () => {
     const password = formData.get('password') as string;
 
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/login/', { telephone, password }, { withCredentials: true });
+      const res = await axios.post('http://127.0.0.1:8000/users/login/', { telephone, password }, { withCredentials: true });
       if (res.status === 200) {
         localStorage.setItem('isLoggedIn', 'true');
         router.push("/");

@@ -9,6 +9,7 @@ import {
   faList,
   faUserMinus,
   faUserPlus,
+  faCompress,
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Badge, Dropdown, Nav, NavLink, ProgressBar,
@@ -35,19 +36,13 @@ const ItemWithIcon = (props: ItemWithIconProps) => {
   );
 };
 
-function requestFullScreen() {
-  const element = document.documentElement;
-
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-  }
-}
 
 export default function HeaderNotificationNav() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
   const [cuves, setCuves] = useState<Cuve[]>([]);
-
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  
   useEffect(() => {
     const fetchData = async () => {
       const stationsData = await fetchStations();
@@ -84,19 +79,31 @@ export default function HeaderNotificationNav() {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  const toggleFullScreen = () => {
+    const element = document.documentElement;
+  
+    if (!isFullScreen) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+    setIsFullScreen(!isFullScreen);  
+  };
+  
+
   return (
     <Nav>
-      <Nav.Item>
-        <Dropdown>
-          <Dropdown.Toggle as={NavLink} bsPrefix="hide-caret" id="dropdown-fullscreen">
-            <FontAwesomeIcon icon={faExpand} size="lg" />
-          </Dropdown.Toggle>
-          <Dropdown.Menu className="pt-0" align="end">
-            <Dropdown.Item onClick={requestFullScreen}>
-              <ItemWithIcon icon={faExpand}>Plein écran</ItemWithIcon>
-            </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
+     <Nav.Item as="li">
+        <NavLink href="#" onClick={toggleFullScreen} className="hide-caret">
+          <FontAwesomeIcon 
+            icon={isFullScreen ? faCompress : faExpand} 
+            size="lg" 
+          />
+        </NavLink>
       </Nav.Item>
 
       <Nav.Item>

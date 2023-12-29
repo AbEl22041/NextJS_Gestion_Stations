@@ -11,6 +11,11 @@ import bgPompiste from './worker_white.png'
 import bgPump from './gas_pump.png';
 import bgStation from './gas_station.png';
 import bgCuve from './cuve.png';
+import UserList from '../components/UserList'; // Adjust the import path as necessary
+import { User } from '../types/types'; // Ensure this path is correct
+import { fetchProfiles } from '../services/api'; // Your API fetching function
+
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import {
@@ -53,7 +58,36 @@ const Home: NextPage = () => {
   const [showStations, setShowStations] = useState(false);
   const [editingStationId, setEditingStationId] = useState<number | null>(null);
   const [isOnlyUpdateActive, setIsOnlyUpdateActive] = useState(false);
-
+  const [users, setUsers] = useState<User[]>([]);
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalPompistes, setTotalPompistes] = useState(0);
+  const [showUsers, setShowUsers] = useState(false);
+  const handleViewUserDetails = async () => {
+    try {
+      const userData = await fetchProfiles();
+      setUsers(userData);
+      setTotalUsers(userData.length);  // Update total users count
+      setTotalPompistes(userData.filter((user: { role: string; }) => user.role === 'pompiste').length);  // Update total pompistes count
+       // Show the UsersList component
+      setShowUsers(true); // Show the UsersList component
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
+  useEffect(() => {
+    const fetchAndSetUserData = async () => {
+      try {
+        const userData = await fetchProfiles();  // Fetch user data
+        setUsers(userData);  // Set the user data
+        setTotalUsers(userData.length);  // Update total users count
+        setTotalPompistes(userData.filter((user: { role: string; }) => user.role === 'pompiste').length);  // Update total pompistes count
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+  
+    fetchAndSetUserData();  // Invoke the async function to fetch and set user data
+  }, [])
   const handleViewDetails = async () => {
     const stationsData = await fetchStations();
     setStations(stationsData);
@@ -120,12 +154,7 @@ const Home: NextPage = () => {
           <Card.Body className="pb-0 d-flex justify-content-between align-items-start" >
             <div>
               <div className="fs-4 fw-semibold " >
-                34
-                <span className="fs-6 ms-2 fw-normal">
-                  (30 pompistes
-                    <FontAwesomeIcon  style = {{margin:'0 4px'}}icon={faGasPump} />
-                  )
-                </span>
+              {totalUsers} <span className="fs-6 ms-2 fw-normal"> ({totalPompistes} pompistes <FontAwesomeIcon style={{ margin: '0 4px' }} icon={faGasPump} /> ) </span>
               </div>
               <div>Utilisateurs</div>
             </div>
@@ -161,7 +190,7 @@ const Home: NextPage = () => {
               height: 'auto', 
             }}
           />
-           <button className={styles.DetailsButton}
+           <button className={styles.DetailsButton} onClick={handleViewUserDetails}
         style={{
           cursor: 'pointer',
           backgroundColor: 'transparent',
@@ -184,6 +213,7 @@ const Home: NextPage = () => {
           </div>
         </Card>
       </div>
+      {showUsers && <UserList />}
 
       <div className="col-sm-6 col-lg-3">
         <Card bg="info" text="white" className="mb-4">

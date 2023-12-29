@@ -21,6 +21,13 @@ export interface Cuve {
     is_active: boolean;
     id_station: number;
   }
-  
+  export interface User {
+  user: Key | null | undefined;
+  user: number;
+  username: string;
+  tel: string;
+  role: string;
+  is_active: boolean;
+  }
 
  

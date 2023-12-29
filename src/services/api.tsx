@@ -21,3 +21,15 @@ export const fetchCuves = async () => {
     return [];
   }
 };
+export const fetchProfiles = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}api/profiles/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching profiles:', error);
+    return [];
+  }
+};
+
+
+
